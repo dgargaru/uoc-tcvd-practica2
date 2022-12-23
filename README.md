@@ -1,9 +1,3 @@
-# uoc-tcvd-practica2
-
-## “Heart Attack Analysis & Prediction dataset”
-
-Identificación de los datos relevantes para un proyecto analítico usando las herramientas de integración, limpieza, validación y análisis de las mismas.
-Para ello se hará uso del dataset con nombre "Heart Attack Analysis & Prediction dataset"
 # Práctica 2 - Tipología y Ciclo de Vida de los Datos
 
 Asignatura: M2.851 / Semestre: 2022-1 / Fecha: 23-12-2022
@@ -23,7 +17,8 @@ Breve desripción de la práctica/sitio web elegido.
   * `/dataset/xxx.csv`: Descripción archivo.
   
 ## Dataset
-Un ejemplo de dataset con el que podéis trabajar es el “Heart Attack Analysis & Prediction dataset”:
+Identificación de los datos relevantes para un proyecto analítico usando las herramientas de integración, limpieza, validación y análisis de las mismas.
+Para ello se hará uso del dataset con nombre "Heart Attack Analysis & Prediction dataset":
 
   * https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-prediction-dataset
 
