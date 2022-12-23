@@ -2,7 +2,7 @@
 
 Asignatura: M2.851 / Semestre: 2022-1 / Fecha: 23-12-2022
 
-URL del sitio web elegido: https://github.com/dgargaru/tcvd-practica2/
+URL del sitio web elegido: https://github.com/dgargaru/uoc-tcvd-practica2
 
 ## Autores
   * Alba Caderno Fernández - [acaderno@uoc.edu](acaderno@uoc.edu)
