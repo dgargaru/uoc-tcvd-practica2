@@ -1,0 +1,294 @@
+---
+title: "Práctica 2: Proyecto analítico. Integración, limpieza, validación y análisis"
+author: "Alba Caderno Fernández - Diego García García"
+date: "28 de diciembre de 2022"
+output:
+  html_document:
+    highlight: default
+    theme: cosmo
+    toc: yes
+    number_sections: yes
+    anchor_sections: yes
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+encoding: "utf-8"
+lang: es    
+---
+<style type="text/css">
+
+h1.title {
+  text-align: center;
+}
+</style>
+```{css, echo=FALSE}
+h4 {
+  text-align: center;
+}
+```
+
+# Índice {-}
+
+# Detalles de la actividad   
+
+## Descripción  
+El objetivo de esta actividad será el tratamiento de un dataset, que puede ser el creado en la Práctica 1 o bien cualquier dataset libre disponible en Kaggle https://www.kaggle.com.  
+
+Un ejemplo de dataset con el que podéis trabajar es el “Heart Attack Analysis & Prediction dataset”: https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-predictiondataset 
+
+<b>Importante:</b> si se elige un dataset diferente al propuesto es importante que este contenga una amplia variedad de datos numéricos y categóricos para poder realizar un
+análisis más rico y poder responder a las diferentes preguntas planteadas en el enunciado de la práctica.
+
+## Objetivos  
+Los objetivos concretos de esta práctica son:
+<ul>
+<li>Aprender a aplicar los conocimientos adquiridos y su capacidad de resolución de problemas en entornos nuevos o poco conocidos dentro de contextos más amplios o multidisciplinares.</li>
+<li>Saber identificar los datos relevantes y los tratamientos necesarios (integración, limpieza y validación) para llevar a cabo un proyecto analítico.</li>
+</li>Aprender a analizar los datos adecuadamente para abordar la información contenida en los datos.</li>
+<li>Identificar la mejor representación de los resultados para aportar conclusiones sobre el problema planteado en el proceso analítico.</li>
+<li>Actuar con los principios éticos y legales relacionados con la manipulación de datos en función del ámbito de aplicación.</li>
+<li>Desarrollar las habilidades de aprendizaje que les permitan continuarestudiando de un modo que tendrá que ser en gran medida autodirigido o autónomo.</li>
+<li>Desarrollar la capacidad de búsqueda, gestión y uso de información y recursos en el ámbito de la ciencia de datos.</li>
+</ul>
+
+## Competencias  
+En esta práctica se desarrollan las siguientes competencias del Máster de Data Science:
+
+<li>Capacidad de analizar un problema en el nivel de abstracción adecuado a cada situación y aplicar las habilidades y conocimientos adquiridos para abordarlo y resolverlo.</li>
+<li>Capacidad para aplicar las técnicas específicas de tratamiento de datos (integración, transformación, limpieza y validación) para su posterior análisis.</li>
+
+# Resolución  
+
+## Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder?  
+El Dataset escogido en el enunciado de la práctica 2 nos muestra los datos para la clasificación de ataques al corazón. Dentro del conjunto de datos nos encontramos con 14 atributos provenientes de 4 bases de datos distintas del Instituto Húngaro de Cardiología en Budapest por Andras Janosi, el Hospital Universitario, Zurich, en Suiza por William Steinbrunn, el Hospital Universitario, Basilea, en Suiza por Matthias Pfisterer y el V.A. Medical Center en Long Beach y Cleveland Clinic Foundation por Robert Detrano.   
+
+El atributo objetivo(output) hace referencia a la presencia de enfermedad cardíaca en el paciente siendo su escala de valores de 0 a 4. Por tanto, a raíz de los valores del conjuntos de datos se quiere averiguar la influencia de las distintas variables con el fin de determinar la presencia (¿es propenso?) de enfermedad cadíaca en los pacientes de estudio.
+
+<b>Nota:</b> Tener en cuenta que en el atributo thall para el valor 0 se ha rellenado el dato con el value null por lo que puede ser necesario usar alguna técnica de ML supervisada para asignarle un valor "aproximado".  
+
+<ul>
+<li><b>Age:</b> Edad del paciente en años.</li>
+<li><b>Sex:</b> Sexo del paciente.</li>
+  <ul>
+    <li>Valor 1: masculino</li>
+    <li>Valor 0: femenino</li>
+  </ul>
+<li><b>cp:</b> Tipo de dolor en el pecho.</li>
+  <ul>
+    <li>Valor 0: Asintomático</li>
+    <li>Valor 1: Angina típica</li>
+    <li>Valor 2: Angina atípica</li>
+    <li>Valor 3: Dolor no-anginoso</li>
+  </ul>
+<li><b>trtbps:</b> Presión arterial en reposo medida en el servicio de admisión del hospital en mm Hg. La presión sistólica.</li>
+<li><b>chol:</b> Colesterol en mg/dl obtenido a través del sensor BMI</li>
+<li><b>fbs:</b> Glucemia en ayunas > 120 mg/dl.</li>
+<ul>
+ <li>Valor 1: Verdadero</li>
+ <li>Valor 0: Falso</li>
+</ul>
+<li><b>rest_ecg:</b> Resultados electrocardiográficos en reposo</li>
+  <ul>
+    <li>Valor 0: Normal</li>
+    <li>Valor 1: Tener anomalías en la onda ST-T (inversiones de la onda T y/o elevación o depresión del ST > 0,05 mV)</li>
+    <li>Valor 2: Mostrar hipertrofia ventricular izquierda probable o definitiva según los criterios de Estes.</li>
+  </ul>
+<li><b>thalach:</b> Frecuencia cardíaca máxima alcanzada.</li>
+<li><b>exang:</b> Angina inducida por el ejercicio</li>
+  <ul>
+    <li>Valor 1: Si</li>
+    <li>Valor 0: No</li>
+  </ul>
+<li><b>old peak:</b> Depresión del ST inducida por el ejercicio en relación con el reposo.</li>
+<li><b>slp:</b> La pendiente del segmento ST de ejercicio máximo (El segmento ST representa el período isoeléctrico cuando los ventrículos se encuentran entre la despolarización y la repolarización (https://es.wikipedia.org/wiki/Segmento_ST)).</li>
+  <ul>
+    <li>Valor 0: Pendiente abajo</li>
+    <li>Valor 1: Plana</li>
+    <li>Valor 2: Pendiente arriba</li>
+  </ul>
+<li><b>caa:</b> Número de vasos principales (0-3) coloreados por fluoroscopia</li>
+<li><b>thall:</b> thalassemia (Resultado de la prueba de esfuerzo con talio)</li>
+  <ul>
+    <li>Valor 0: null</li>
+    <li>Valor 1: Defecto fijo</li>
+    <li>Valor 2: Normal</li>
+    <li>Valor 3: Defecto reversible</li>
+  </ul>
+<li><b>output:</b> Diagnóstico de enfermedad cardíaca (estado de enfermedad angiográfico). Si el valor es 1 entonces el paciente es más propenso a tener una enfermedad cardíaca mientras que si es 0 entonces la situación del paciente no es crítica. El estrechamiento del vaso es peligroso ya que es posible que la sangre no bombee a través del corazón, lo que puede provocar un paro cardíaco.</li>
+  <ul>
+    <li>Valor 0: < 50% estrechamiento del diámetro. Menos posibilidades de ataque al corazón.</li>
+    <li>Valor 1: > 50% estrechamiento del diámetro. Más posibilidades de ataque al corazón.</li>
+  </ul>
+</ul>  
+
+
+## Integración y selección de los datos de interés a analizar. Puede ser el resultado de adicionar diferentes datasets o una subselección útil de los datos originales, en base al objetivo que se quiera conseguir.  
+```{r}
+# Carga del fichero de datos y lectura de los mismos
+dt_heart <- read.csv("heart.csv", header = TRUE)
+```
+
+```{r}
+# Visualización previa de los datos.
+# Tipo de dato asignado a cada campo para hacernos una idea del conjunto.
+str(dt_heart)
+sapply(dt_heart, function(x) class(x))
+summary(dt_heart)
+typeof(dt_heart)
+```
+
+```{r}
+#install.packages("ggplot2")
+library(purrr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+# Se realiza un estudio visual de todas las variables para analizar sus distribuciones así como posibles interpretaciones iniciales.
+dt_heart %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+    facet_wrap(~ key, scales = "free") +
+    labs(x="Variables",y= "Frecuencia")  +
+    geom_histogram()
+```
+
+En base a los resultados obtenidos, del conjunto de datos, podemos obtener una relación de primeras ideas como: 
+<ul>
+  <li>La asignación automática de tipo de datos de R al conjunto se basa en valores enteros y numéricos.</li>
+  <li>Los pacientes de estudio se sitúan en edades comprendidas entre los 29 y los 77 años diendo la media de 54 años.</li>
+  <li>Existe más cantidad de personas con sexo masculino que con femenino.</li>
+  <li>Una minoría de las personas de estudio presenta dolor no-anginoso frente a la mayoría que son asintomáticos.</li>
+  <li>La presión sistólica de los pacientes se centra en torno a los 130mm Hg.</li>
+  <li>La distribución de los datos de la variable colesterol presenta cierta cola a la derecha por lo que los datos se concentrando en torno a los 250 mg/dl.</li>
+  <li>La mayoría de los pacientes no presenta glucemia en ayunas por encima de los 120 mg/dl</li>
+  <li>La mayoría de los pacientes no presenta angina inducida por el ejercicio</li>
+</ul>
+
+## Limpieza de los datos.
+### ¿Los datos contienen ceros o elementos vacíos? Gestiona cada uno de estos casos.  
+```{r}
+# Verificar que no existen elementos NA.
+sapply(dt_heart, function(x) sum(is.na(x)))
+```
+
+```{r}
+# Verificar en base a la descripción de los atributos los valores distintos de cada uno de ellos para detectar aquellos que sean neesarios tratar.
+sapply(dt_heart, function(x) unique(x))
+```
+
+<b>Como se aprecia en los resultados obtenidos será necesario tratar el atributo:</b>
+<ul>
+  <li><b>thall:</b> ya que en un apartado anterior, en el que se describe el dataset, se ha puntualizado que existen valores 0 que hacen referencia a un valor "null" y en concreto son dos observaciones. Por tanto, para dar sentido a estos valores se usará un método de imputación de valores basado en la similitud o diferencia entre los registros. Se usará kNN imputation ya que damos por hecho que los registros están relacionados. Igualmente siempre será mejor tratar los resultados de análisis de datos cercanos frente a datos vacíos.</li>
+  <li><b>caa: se aprecia un valor fuera del rango definido. Dicho valor es el 4 que se tratará como un NA y se procederá de la misma manera que para el atributo anterior.</b></li>
+</ul>
+
+```{r}
+suppressWarnings(suppressMessages(library(VIM)))
+dt_heart$thall[dt_heart$thall == 0] <- NA # Sustituir valor 0(null) por NA
+dt_heart$caa[dt_heart$caa == 4] <- NA # Sustituir valor 0(null) por NA
+dt_heart$thall <- kNN(dt_heart)$thall
+dt_heart$caa <- kNN(dt_heart)$caa
+unique(dt_heart$thall)
+unique(dt_heart$caa)
+```
+### Identifica y gestiona los valores extremos.  
+Para poder visualizar de una manera rápida y sencilla para el humano realizamos un boxplot o gráfico de caja.
+```{r}
+boxplot(dt_heart)
+```
+```{r}
+print("Val. extr. trtbps")
+boxplot.stats(dt_heart$trtbps)$out
+print("Val. extr. chol")
+boxplot.stats(dt_heart$chol)$out
+print("Val. extr. thalach")
+boxplot.stats(dt_heart$thalach)$out
+print("Val. extr. oldpeak")
+boxplot.stats(dt_heart$oldpeak)$out
+print("Val. extr. caa")
+boxplot.stats(dt_heart$caa)$out
+```
+En base a los resultados del gráfico se identifican los siguientes atributos con posibles valores extremos:
+<ul>
+<li>trtbps</li>
+<li>chol</li>
+<li>thalach</li>
+<li>exang</li>
+<li>oldpeak</li>
+<li>caa</li>
+</ul>
+
+Para el análisis de estudio no se tratarán estos valores como extremos ya que a pesar de ser cierto que se alejan de la media, son valores que se consideran reales y deben ser tratados en el estudio. Eliminarlos provocaría distorsión en la interpretación de los resultados.
+
+## Análisis de los datos.  
+
+### Selección de los grupos de datos que se quieren analizar/comparar (p.ej., si se van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)  
+Atendiendo a la definición, expuesta en el primer apartado, de cada variables del conjunto de datos, los agruparemos de la siguiente manera: 
+<ul>
+  <li>Grupo 1: Con el fin de estudiar el impacto de la glucemia en ayunas se seleccionarán aquellos datos cuyos pacientes presenten un nivel de Glucemia porencima de 120 mg/dl. La finalidad de esta prueba estadística es realizar un contraste de hipótesis para averiguar si los índices de Glucecia indican más inclinación a la enfermedad cardíaca. Esta variable nos permitirá identificar pacientes propensos a la enfermedad con valores de un indicador "pre-enfermedad cardíaca", es decir, podremos obtener resultados de un indicador sin que el paciente, posiblemente, haya sufrido una enfermedad cardíaca aún. De ahí la importancia de estudiar esta variable y su posible predicción. </li>
+  <li>Grupo 2: Con el fin de estudiar el impacto de la pendiente del segmento ST de ejercicio máximo se seleccionarán aquellos datos cuyos pacientes presenten una pendiente abajo. La finalidad de esta prueba estadística es realizar un </li>
+</ul>
+
+Indistintamente de la creación de los grupos será muy interesante realizar un análisis de la correlación entre las variables del conjunto de datos para poder obtener más información sobre su comportamiento.
+```{r}
+# Grupo1
+dt_heart_glucemia <- dt_heart[dt_heart$fbs == 1, ] 
+str(dt_heart_glucemia)
+```
+
+
+### Comprobación de la normalidad y homogeneidad de la varianza.  
+Para comprobar la normalidad de los distintos atributos que conforman el dataset se analizará una por una, con el fin de aplicar el estudio a aquellas que presenten normalidad. 
+Se aplicarán distintas pruebas de normalidad sobre los datos siendo éstas: 
+<ul>
+  <li>Anderson-Darling: Estudio de bondad de ajuste que mide el área entre la línea ajustada y la función de distribución empírica.</li>
+  <li>Lilliefors: Es una mejora de la prueba de Kolomogorov-Smirnov y se recomienda usar en conjunto de datos de más de 50 observaciones.</li>
+</ul>
+```{r}
+# Identificar normalidad en variables del Dataset
+library(nortest)
+alpha = 0.05
+col.names = colnames(dt_heart)
+for (i in 1:ncol(dt_heart)) {
+  if (i == 1) cat("Variables que no siguen una distribución normal mediante la 'Prueba de Anderson-Darling':\n")
+  if (is.integer(dt_heart[,i]) | is.numeric(dt_heart[,i])) {
+    p_val = ad.test(dt_heart[,i])$p.value
+    if (p_val < alpha) {
+      cat(col.names[i])
+      # Format output
+      if ( (i < ncol(dt_heart) - 1) | (i == ncol(dt_heart)-1) ) cat(", ") 
+      if (i %% 5 == 0) cat("\n")
+    }
+  }
+}
+```
+```{r}
+library(nortest)
+alpha = 0.05
+col.names = colnames(dt_heart)
+for (i in 1:ncol(dt_heart)) {
+  if (i == 1) cat("Variables que no siguen una distribución normal mediante la 'Prueba de Lilliefors ':\n")
+  if (is.integer(dt_heart[,i]) | is.numeric(dt_heart[,i])) {
+    p_val = lillie.test(dt_heart[,i])$p.value 
+    if (p_val < alpha) {
+      cat(col.names[i])
+      # Format output
+      if ( (i < ncol(dt_heart) - 1) | (i == ncol(dt_heart)-1) ) cat(", ") 
+      if (i %% 5 == 0) cat("\n")
+    }
+  }
+}
+```
+Si nos apoyamos tanto en las gráficas de las variables mostradas en un apartado anterior y en la evaluación de los resultados de las pruebas de Anderson-Darling y Lilliefors (para un nivel de significación de 0.05 se ha obtenido p-values inferioriores) podemos afirmar la ausencia de normalidad en los datos de estudio.  Definir la ausencia o no, de normalidad es básico para las futuras pruebas estadísticas o modelos de regresión. 
+
+<b> Estudio de la homogeneidad de la varianza >/b>
+
+
+### Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.  
+
+## Representación de los resultados a partir de tablas y gráficas. Este apartado se puede responder a lo largo de la práctica, sin necesidad de concentrar todas las representaciones en este punto de la práctica.  
+
+## Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?  
