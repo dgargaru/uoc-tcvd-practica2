@@ -284,11 +284,239 @@ for (i in 1:ncol(dt_heart)) {
 ```
 Si nos apoyamos tanto en las gráficas de las variables mostradas en un apartado anterior y en la evaluación de los resultados de las pruebas de Anderson-Darling y Lilliefors (para un nivel de significación de 0.05 se ha obtenido p-values inferioriores) podemos afirmar la ausencia de normalidad en los datos de estudio.  Definir la ausencia o no, de normalidad es básico para las futuras pruebas estadísticas o modelos de regresión. 
 
-<b> Estudio de la homogeneidad de la varianza >/b>
+A continuación, dado que no se cumple la condición de normalidad en los datos, estudiamos la homogeneidad de varianzas mediante la aplicación de un test de Fligner-Killeen. En este caso, estudiaremos esta homogeneidad en cuanto al grupo conformado por personas con glucemia en ayunas mayor que 120 mg/dl frente a personas con glucemia en ayunas menor que 120mg/dl. En el siguiente test, la hipótesis nula consiste en que ambas varianzas son iguales.
 
+```{r}
+fligner.test(output ~ fbs, data = dt_heart)
+```
+Puesto que obtenemos un p-valor superior a 0'05, aceptamos la hipótesis de que las varianzas de ambas muestras son homogéneas.
 
 ### Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.  
 
-## Representación de los resultados a partir de tablas y gráficas. Este apartado se puede responder a lo largo de la práctica, sin necesidad de concentrar todas las representaciones en este punto de la práctica.  
+<b>¿Qué variables tienen mayor influencia para determinar la presencia de enfermedad cardíaca?</b>
 
-## Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?  
+Vamos a realizar un análisis de correlación entre las distintas variables para determinar cuáles de ellas ejercen una mayor influencia sobre la posible presencia de ataque cardíaco. En este caso, dado que los datos no siguen una distribución normal, utilizaremos el coeficiente de correlación de Spearman.
+```{r}
+corr_matrix <- matrix(nc = 2, nr = 0)
+colnames(corr_matrix) <- c("estimate", "p-value")
+
+# Calcular el coeficiente de correlación para cada variable
+# con respecto al campo "output"
+for (i in 1:(ncol(dt_heart) - 1)) {
+  
+    spearman_test = cor.test(dt_heart[,i],
+                             dt_heart[,length(dt_heart)],
+                             method = "spearman", exact = FALSE)
+    corr_coef = spearman_test$estimate
+    p_val = spearman_test$p.value
+    # Add row to matrix
+    pair = matrix(ncol = 2, nrow = 1)
+    pair[1][1] = corr_coef
+    pair[2][1] = p_val
+    corr_matrix <- rbind(corr_matrix, pair)
+    rownames(corr_matrix)[nrow(corr_matrix)] <- colnames(dt_heart)[i]
+}
+print(corr_matrix)
+```
+Así, identificamos cuáles son las variables más correlacionadas con un diagnóstico de enfermedad cardíaca en función de su proximidad con los valores -1 y +1. Teniendo esto en cuenta, queda patente cómo la variable más relevante en el diagnóstico de enfermedad cardíaca es el número de vasos sanguíneos principales coloreados por fluoroscopia (caa), que está correlacionada negativamente con la variable objetivo, seguida del tipo de dolor en el pecho (cp) correlacionada positivamente, la presencia de angina inducida por el ejercicio (exng) correlacionada negativamente,
+la frecuencia cardíaca máxima alcanzada (thalachh) correlacionada positivamente, y en último lugar la depresión del ST inducida por el ejercicio en relación con el reposo (oldpeak), correlacionada negativamente con la variable objetivo.
+
+<b>¿Es propenso el paciente a tener una enfermedad cardíaca si la glucemia en ayunas es > 120 mg/dl?</b>
+
+La segunda prueba estadística que se aplicará consistirá en un contraste de hipótesis para comprobar si existen diferencias significativas en la variable objetivo (output) entre los grupos definidos por la variable Glucemia en ayunas > 120 mg/dl (fbs), con el fin de  averiguar si el paciente es más o menos propenso a la presencia de enfermedad cardíaca según su nivel de glucemia en ayunas.
+Como ambas variables son categóricas y los datos no cumplen la condición de normalidad, lo más eficiente es aplicar el test Chi-cuadrado de Pearson para comprobar si existen diferencias significativas entre ambas variables. Así, se plantea el siguiente contraste de hipótesis sobre la independencia de la propensión a tener un ataque cardíaco sobre el índice de glucemia en ayunas:
+<ul>
+  <li>H0 : La probabilidad de sufrir un ataque cardíaco es independiente de los niveles de glucemia en ayunas</li>
+  <li>H1 : La probabilidad de sufrir un ataque cardíaco no es independiente de los niveles de glucemia en ayunas</li>
+</ul>
+
+```{r}
+# Tabla de contingencia
+heart_output_fbs <- table(dt_heart$output, dt_heart$fbs)
+# Test Chi-cuadrado de independencia entre output y fbs
+chisq.test(heart_output_fbs, correct = FALSE)
+```
+A partir de las frecuencias de cada valor del estado de enfermedad angiográfico para cada uno de los grupos, se observa que obtenemos un p-valor mayor que el valor de significación (0,05), por tanto no se rechaza la hipótesis nula. Así, no tenemos suficientes pruebas para concluir que si la glucemia del paciente en ayunas es > 120 mg/dl, el paciente sea propenso a poseer una enfermedad cardíaca.
+
+<b>¿Es propenso el paciente a tener una enfermedad cardíaca si la pendiente del segmento ST de ejercicio máximo es hacia arriba?</b>
+
+Esta prueba consistirá en un contraste de hipótesis para comprobar si existen diferencias significativas en la variable objetivo entre los grupos definidos por la variable Pendiente del segmento ST de ejercicio máximo (slp), con el fin de  averiguar si el paciente es más o menos propenso a la presencia de enfermedad cardíaca según el valor de la pendiente del segmento ST.
+Nos encontramos en las mismas condiciones que el caso anterior, así que plantearemos un contraste de hipótesis sobre la independencia de la propensión a tener un ataque cardíaco sobre la pendiente del segmento ST:
+<ul>
+  <li>H0 : La probabilidad de sufrir un ataque cardíaco es independiente del valor de la pendiente del segmento ST.</li>
+  <li>H1 : La probabilidad de sufrir un ataque cardíaco no es independiente del valor de la pendiente del segmento ST.</li>
+</ul>
+
+```{r}
+# Test Chi-cuadrado de independencia entre output y slp
+heart_output_slp <- table(dt_heart$output, dt_heart$slp)
+chisq.test(heart_output_slp, correct = FALSE)
+```
+En este caso, se observa que obtenemos un p-valor mucho menor que el valor de significación fijado, así que rechazamos la hipótesis nula. Por tanto, podemos concluir que, efectivamente, el paciente es más propenso a padecer un ataque cardíaco si la pendiente del segmento ST es hacia arriba.
+## Modelo de regresión logística
+Tal y como se planteó en los objetivos de la actividad, resultará de mucho interés poder realizar predicciones sobre las probabilidades del paciente a sufrir un ataque cardíaco dadas sus características. Así, se calculará un modelo de regresión logística utilizando regresores tanto cuantitativos como cualitativos con el que poder realizar las predicciones de las probabilidades.
+Para obtener un modelo de regresión logística considerablemente eficiente, lo que haremos será obtener varios modelos de regresión utilizando las variables que estén más correlacionadas con la variable de salida, según los resultados obtenidos anteriormente. Así, de entre todos los modelos que tengamos, escogeremos el mejor utilizando como criterio aquel que presente un menor AIC.
+```{r}
+# Regresores cuantitativos con mayor coeficiente de correlación con respecto a la probabilidad de ataque cardíaco
+#caa thalachh oldpeak 
+#Regresores cualitativos
+#cp exng thall slp
+# Variable a predecir
+#$output
+
+#1-fold Train-Test Split
+set.seed(4321)
+indexes <- sample(1:nrow(dt_heart), floor(.7*nrow(dt_heart)))
+
+dt_heart.train <- dt_heart[indexes,]
+dt_heart.test <- dt_heart[-indexes,]
+
+# Generación de varios modelos
+modelo1 <- glm(formula = output ~ caa + thalachh + oldpeak + cp + exng, data = dt_heart.train, family=binomial(link="logit"))
+modelo2 <- glm(formula = output ~ caa + thalachh + oldpeak + cp + exng + thall + slp, data = dt_heart.train, family=binomial(link="logit"))
+modelo3 <- glm(formula = output ~ caa + cp + exng, data = dt_heart.train, family=binomial(link="logit"))
+modelo4 <- glm(formula = output ~ caa + thalachh + oldpeak, data = dt_heart.train,  family=binomial(link="logit"))
+```
+En este caso, la bondad del modelo se evaluará mediante la medida AIC. Dado que esta medida tiene en cuenta tanto la bondad del ajuste (el error) como la complejidad del modelo, seleccionaremos aquel modelo que resulte en el menor AIC.
+```{r}
+#  AIC de cada modelo
+summary(modelo1)$aic
+summary(modelo2)$aic
+summary(modelo3)$aic
+summary(modelo4)$aic
+```
+Observamos que el mejor modelo es el segundo, ya que es el que posee menor AIC:
+```{r}
+summary(modelo2)
+```
+Con estos valores dibujamos la gráfica del modelo de regresión logística:
+```{r fig.height = 2, fig.width = 4}
+library(magrittr, warn.conflicts = FALSE)
+library(dplyr, warn.conflicts = FALSE) 
+
+dt_heart_2 <- dt_heart[-indexes,] %>% mutate(test = 0.755579 -1.017496*caa     
+                               + 0.016295 * thalachh      
+                               - 0.654002 * oldpeak     
+                               + 0.558657 * cp
+                       - 0.873063 * exng
+                       - 1.139052 * thall
+                       + 0.492043 * slp)
+ggplot(dt_heart_2, aes(y = output, x= test)) +
+            geom_point(mapping = aes(col=as.factor(output))) +
+            geom_vline(xintercept=-0.5) +
+            geom_smooth(method = "glm",
+                            method.args = list(family = "binomial"), 
+                            se = FALSE) +
+            coord_flip() +
+            labs( x = "Output value of test",
+                  y = "Probability of Heart Disease",
+                  col = "True value")
+```
+Ahora, utilizando este modelo, podemos realizar predicciones sobre la probabilidad de sufrir un ataque cardíaco. Realizamos predicciones sobre los conjuntos de entrenamiento y test, con el objetivo de calcular la precisión en cada uno: 
+```{r}
+#Importar libreria requerida
+library(caret, warn.conflicts = FALSE)
+# Prediccion sobre los conjuntos de train y test
+dt_heart.train.predict<-predict(modelo2,dt_heart.train)
+dt_heart.test.predict<-predict(modelo2,dt_heart.test)
+#Train accuracy for model:
+mean(as.numeric(dt_heart.train.predict>=0)==dt_heart.train$output)
+#Test accuracy for model
+mean(as.numeric(dt_heart.test.predict>=0)==dt_heart.test$output)
+```
+Una vez calculados los valores predichos, pintamos la matriz de confusión:
+```{r fig.height = 2, fig.width = 4}
+# Matriz de confusion
+cm <- confusionMatrix(data=factor(dt_heart.test$output), reference=factor(as.numeric(dt_heart.test.predict>=0)), dnn = c("Reference", "Prediction"))
+
+plt <- as.data.frame(cm$table)
+plt$Prediction <- factor(plt$Prediction, levels=rev(levels(plt$Prediction)))
+
+ggplot(plt, aes(Prediction,Reference, fill= Freq)) +
+        geom_tile() + geom_text(aes(label=Freq)) +
+        scale_fill_gradient(low="white", high="#009194") +
+        labs(x = "Reference",y = "Prediction") +
+        scale_x_discrete(labels=c("1","0")) +
+        scale_y_discrete(labels=c("0","1"))
+```
+Observando la matriz de confusión, vemos que el modelo predice correctamente 79 de los 91 diagnósticos de pacientes, de los cuales 45 son clasificados correctamente como propensos a sufrir un ataque al corazón y 34 poseen una situación no crítica. Además, 10 pacientes son clasificados incorrectamente como poco propensos a enfermedad cardíaca y 2 pacientes son clasificados como propensos a la enfermedad, cuando en realidad no lo son.
+
+Observamos también las medidas de bondad del modelo:
+```{r}
+confusionMatrix(data=factor(dt_heart.test$output), reference=factor(as.numeric(dt_heart.test.predict>=0)), dnn = c("Reference", "Prediction"))
+```  
+En este caso, podríamos decir que el modelo funciona bastante bien, puesto que tanto la sensibilidad como la especificidad son altas. Una prueba altamente sensible significa que hay pocos resultados falsos negativos y, por lo tanto, se pasan por alto menos casos propensos a la enfermedad. La especificidad de una prueba es su capacidad para designar como negativo a un individuo que no es propenso a una enfermedad. Una prueba altamente específica significa que hay pocos resultados falsos positivos.
+## Representación de los resultados a partir de tablas y gráficas. Este apartado se puede responder a lo largo de la práctica, sin necesidad de concentrar todas las representaciones en este punto de la práctica.
+A lo largo de la práctica, se ha realizado una exploración visual de las distintas variables y representaciones para analizar los valores extremos o vacíos. En el apartado 4 hemos visto que nuestros datos no cumplen la condición de normalidad. Para representar la normalidad de los datos se pueden utilizar los QQplots ya que permiten observar la similitud entre las distribuciones de dos conjuntos de datos, la analizada y una distribución normal ideal. Así, realizamos una representación de cada variable del dataset:
+```{r}
+par(mfrow=c(2,4))
+qqnorm(dt_heart$age)
+qqline(dt_heart$age,col=2)
+qqnorm(dt_heart$sex)
+qqline(dt_heart$sex,col=2)
+qqnorm(dt_heart$cp)
+qqline(dt_heart$cp,col=2)
+qqnorm(dt_heart$trtbps)
+qqline(dt_heart$trtbps,col=2)
+qqnorm(dt_heart$chol)
+qqline(dt_heart$chol,col=2)
+qqnorm(dt_heart$fbs)
+qqline(dt_heart$fbs,col=2)
+qqnorm(dt_heart$restecg)
+qqline(dt_heart$restecg,col=2)
+qqnorm(dt_heart$thalachh)
+qqline(dt_heart$thalachh,col=2)
+qqnorm(dt_heart$exng)
+qqline(dt_heart$exng,col=2)
+qqnorm(dt_heart$oldpeak)
+qqline(dt_heart$oldpeak,col=2)
+qqnorm(dt_heart$slp)
+qqline(dt_heart$slp,col=2)
+qqnorm(dt_heart$caa)
+qqline(dt_heart$caa,col=2)
+qqnorm(dt_heart$thall)
+qqline(dt_heart$thall,col=2)
+qqnorm(dt_heart$output)
+qqline(dt_heart$output,col=2)
+```
+Como podemos observar, todas las distribuciones se alejan mucho de la normal.
+
+Por otra parte, representaremos una matriz de correlación para visualizar la correlación entre las variables:
+```{r fig.height = 3, fig.width = 5}
+# Cargamos librería
+library(corrplot)
+# Pintamos la el gráfico
+corrplot(cor(dt_heart), is.cor = FALSE)
+```
+En este gráfico podemos observar como efectivamente, las variables más correlacionadas con nuestra variable objetivo son: caa, thalach, oldpeak, cp, exng, thall y slp, ya que son las que tienen un mayor y más marcado círculo.
+En cuanto a los contrastes de hipótesis, las diferencias encontradas entre los grupos se pueden analizar a través de diagramas de barras, para ver más claramente la dirección de estas diferencias. Así, en este caso se puede observar que no se aprecian grandes diferencias cuando la glucemia en ayunas es mayor que 120 mg/dl, ya que la frecuencia es similar para propensos a ataque cardíaco y para situaciones no críticas.
+```{r fig.height = 2, fig.width = 4}
+# Convertir variables a factor
+dt_heart$fbs <- as.factor(dt_heart$fbs)
+dt_heart$output <- as.factor(dt_heart$output)
+# Reprentacion gráfica
+ggplot(data = dt_heart, aes(x = fbs, fill = output)) + geom_bar()
+```
+Por otro lado,se aprecia una mayor frecuencia a que el diagnóstico sea enfermedad cardíaca si la pendiente del segmento ST de ejercicio máximo es hacia arriba, como podemos observar en el diagrama:
+```{r fig.height = 2, fig.width = 4}
+# Convertir variables a factor
+dt_heart$fbs <- as.factor(dt_heart$slp)
+dt_heart$output <- as.factor(dt_heart$output)
+# Reprentacion gráfica
+ggplot(data = dt_heart, aes(x = slp, fill = output)) + geom_bar()
+```
+En el caso de la regresión/clasificación logística, nuevamente se ha optado por realizar la representación del modelo de regresión logística y la matriz de confusión en el propio apartado.
+```{r}
+# Exportar el fichero resultante con los datos finales analizados
+write.csv(dt_heart, "heart_final.csv", row.names=FALSE)
+```
+
+## Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
+En primer lugar, se ha realizado una exploración visual para comprobar la distribución de los datos y se han tratado valores nulos en las variables. Los valores outliers no se han tratado como tal, ya que son valores reales y su supresión llevaría a una interpretación errónea.
+De los métodos de contraste de pótesis y correlaciones, se puede observar que los pacientes con la pendiente del segmento ST de ejercicio máximo hacia arriba son más propensos a padecer un ataque cardíaco. Además, se ha verificado que la glucemia en ayunas > 120 mg/dl no es un factor significativo a la hora de diagnosticar la propensión a esta enfermedad. Se ha confirmado que la variable más significativa a la hora de detectar un posible ataque cardíaco es el número de vasos sanguíneos coloreados por fluoroscopia (caa), ya que en este caso se puede detectar una posible obstrucción en algún tejido que no sea coloreado. Algunas de las variables cuantitativas cuyos valores pueden ser indicativo de aumentar/reducir la probabilidad a padecer la enfermedad son la frecuencia cardíaca máxima alacanzada (thalachh), la depresión del ST inducida por el ejercicio en relación con el reposo (oldpeak). En cuanto a las variables categóricas, cobran importancia el tipo de dolor en el pecho (cp), la presencia de angian inducida por el ejercicio (exng), el resultado de la prueba de esfuerzo con talio (thall) y la pendiente del segmento ST de ejercicio máximo (slp). Posteriormente, con estas variables se han entrenado varios modelos de regresión logística, eligiendo finalmente el de mayor bondad, y realizando predicciones sobre el conjunto de test. El modelo funciona bastante bien, puesto que tanto la sensibilidad como la especificidad son altas, y posee una precisión de 0.8681. Es decir, la probabilidad de que el modelo clasifique correctamente a una persona propensa a padecer un ataque cardíaco es de +-87%.
+```{r}
+library(knitr)
+df <- data.frame(Contribuciones = c("Investigación previa","Redacción de las respuestas","Desarrollo del código","Participación en el vídeo"),
+                 Firma = c("Alba Caderno Fernández, Diego García García","Alba Caderno Fernández, Diego García García","Alba Caderno Fernández, Diego García García","Alba Caderno Fernández, Diego García García"))
+kable(df)
+```
