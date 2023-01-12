@@ -15,12 +15,6 @@ Breve desripción de la práctica/sitio web elegido.
   * `/source/main.py`: Archivo principal del código fuente.
   * `/source/requirements.txt`: Lista de paquetes utilizados (Python 3.10).
   * `/dataset/xxx.csv`: Descripción archivo.
-  
-## Dataset
-Identificación de los datos relevantes para un proyecto analítico usando las herramientas de integración, limpieza, validación y análisis de las mismas.
-Para ello se hará uso del dataset con nombre "Heart Attack Analysis & Prediction dataset":
-
-  * https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-prediction-dataset
 
 ## Vídeo de presentación
 
