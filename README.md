@@ -11,10 +11,10 @@ URL del sitio web elegido: https://github.com/dgargaru/uoc-tcvd-practica2
 ## Descripción del repositorio
 Breve desripción de la práctica/sitio web elegido.
 
-  * `memoria.pdf`: Documento de respuestas.
-  * `/source/main.py`: Archivo principal del código fuente.
-  * `/source/requirements.txt`: Lista de paquetes utilizados (Python 3.10).
-  * `/dataset/xxx.csv`: Descripción archivo. 
+  * `/code/TYCD_practica_2.pdf`: Documento de respuestas.
+  * `/code/TYCD_practica_2.Rmd`: Archivo principal del código fuente.
+  * `heart.csv`: Fichero CSV con los datos originales.
+  * `heart_final.csv`: Fichero CSV con los datos finales analizados.
 
 ## Vídeo de presentación
 
